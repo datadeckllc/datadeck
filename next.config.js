@@ -16,10 +16,9 @@ module.exports = {
         services: {
             sosCa: {
                 cmd: ['go', 'run'],
-                goFile: 'sosCa.go',
-                outputFileName: 'real_estate_datadeck.xls'
+                goPath: 'ddpkg/sosCa/sosCa',
+                outputFileName: 'SOSCA.xlsx'
             }
         }
-    },
-
+    }
 };

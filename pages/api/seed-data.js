@@ -3,13 +3,14 @@ import {serializeError } from 'serialize-error';
 import formidable from 'formidable';
 import { v4 as uuidv4 } from 'uuid';
 import { runMiddleware } from './middleware';
-import timeout from 'connect-timeout'; //express v4
-import { callSosCa} from './services/sosCA';
-import path from "path";
-
-app.use(timeout(process.env.api.timeout));
-// Add all other middleware here
-app.use(haltOnTimedout);
+import timeout from 'connect-timeout';
+const test = require('./services/sosCa');
+const { callSosCa } = require('./services/sosCa');
+const haltOnTimedout = (req, res, next) => {
+  if (!req.timedout) {
+    next();
+  }
+};
 
 // Disable the JSON body parser so we get a stream
 export const config = {
@@ -27,9 +28,16 @@ const sendJsonResponse = (req, res, code, data) => {
 
 const ensureDirExists = async targetDir => fs.promises.mkdir(targetDir, { recursive: true });
 
+const setContentDisposition = res => {
+  res.setHeader('Content-Disposition', `attachment; filename="${process.env.services.sosCa.outputFileName}"`);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+};
+
 export default async (req, res) => {
   // Run the middleware: https://nextjs.org/docs/api-routes/api-middlewares
-  await runMiddleware(req, res, cors)
+  await runMiddleware(req, res, timeout(process.env.api.timeout))
+  // Add all other middleware here
+  await runMiddleware(req, res, haltOnTimedout);
 
   const uuid = uuidv4();
 
@@ -52,14 +60,14 @@ export default async (req, res) => {
               return;
             }
 
-            console.log('Finished parsing file', {fullPath: files.file.path, originalFilename: files.file.name, uuid});
+            console.log('Finished parsing uploaded file', {fullPath: files.file.path, originalFilename: files.file.name, uuid});
 
             console.log('Calling SOS CA');
             const sosCaResult = await callSosCa(files.file.path);
             console.log('Finished Calling SOS CA.', sosCaResult);
 
             if (!sosCaResult.filestream) {
-              const wrappedErr = {msg: 'No sosCA Output File', err: serializeError(err)};
+              const wrappedErr = {msg: 'No SOSCA Excel Output File Created by SOSCA Tool', err: serializeError(err)};
               console.error(wrappedErr);
               alreadyResolved=true;
               sendJsonResponse(req, res, 500, wrappedErr);
@@ -83,6 +91,8 @@ export default async (req, res) => {
               console.log('Partial results detected');
               res.status(206); // Let the pipe finish the partial results
             }
+
+            setContentDisposition(res);
 
             sosCaResult.filestream.pipe(res)
                 .on('error', err => {
