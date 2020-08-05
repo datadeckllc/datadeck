@@ -1,10 +1,10 @@
 import fs from 'fs';
-import {serializeError } from 'serialize-error';
+import {serializeError} from 'serialize-error';
 import formidable from 'formidable';
-import { v4 as uuidv4 } from 'uuid';
-import { runMiddleware } from './middleware';
+import {v4 as uuidv4} from 'uuid';
+import {runMiddleware} from './middleware';
 import timeout from 'connect-timeout';
-const test = require('./services/sosCa');
+import {sendJsonResponse} from "./lib";
 const { callSosCa } = require('./services/sosCa');
 const haltOnTimedout = (req, res, next) => {
   if (!req.timedout) {
@@ -19,19 +19,8 @@ export const config = {
   },
 };
 
-const sendJsonResponse = (req, res, code, data) => {
-  if (res.headersSent) {
-    return console.error('Response headers already sent.  Will not attempt to re-send response', data);
-  }
-  res.status(code).json(data);
-};
-
 const ensureDirExists = async targetDir => fs.promises.mkdir(targetDir, { recursive: true });
 
-const setContentDisposition = res => {
-  res.setHeader('Content-Disposition', `attachment; filename="${process.env.services.sosCa.outputFileName}"`);
-  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-};
 
 export default async (req, res) => {
   // Run the middleware: https://nextjs.org/docs/api-routes/api-middlewares
@@ -66,7 +55,15 @@ export default async (req, res) => {
             const sosCaResult = await callSosCa(files.file.path);
             console.log('Finished Calling SOS CA.', sosCaResult);
 
-            if (!sosCaResult.filestream) {
+            sendJsonResponse(req, res, 200, sosCaResult);
+            alreadyResolved=true;
+            resolve();
+
+            // Stream File response
+
+/*            if (!sosCaResult.outputFileCreated) {
+              sosCaResult.filestream = fs.createReadStream(sosCaResult.outputPath);
+
               const wrappedErr = {msg: 'No SOSCA Excel Output File Created by SOSCA Tool', err: serializeError(err)};
               console.error(wrappedErr);
               alreadyResolved=true;
@@ -115,7 +112,7 @@ export default async (req, res) => {
                   if (!alreadyResolved) {
                     resolve();
                   }
-                });
+                });*/
           }
           catch (err) {
             const wrappedErr = {msg: 'Unhandled error reading posted file', err: serializeError(err)};

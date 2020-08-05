@@ -2,16 +2,16 @@ import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 
-const getSosCaOutputXlsxReadStream = async (newCwd, inputPath) => new Promise(resolve => {
-    const outputPath = path.resolve(newCwd, process.env.services.sosCa.outputFileName);
+const verifySosCaOutputXlsx = async (newCwd, inputPath, outputPath) => new Promise(resolve => {
+
     console.log('Creating Readstream for output path', outputPath, 'inputPath', inputPath)
     fs.access(outputPath, fs.F_OK, (err) => {
         if (err) {
             console.error('No XLSX Output File', err);
-            return resolve(null);
+            return resolve(false);
         }
         console.log('XLSX Output File Detected', outputPath);
-        resolve(fs.createReadStream(outputPath));
+        resolve(true);
     });
 });
 
@@ -49,9 +49,11 @@ const callSosCa = async (inputFilePath) => {
         });
     });
 
+    const outputPath = path.resolve(newCwd, process.env.services.sosCa.outputFileName);
     return {
         ...soscaResult,
-        filestream: await getSosCaOutputXlsxReadStream(newCwd, goArgumentInputFile)
+        outputFileCreated: await verifySosCaOutputXlsx(newCwd, goArgumentInputFile, outputPath),
+        outputPath
     }
 };
 
