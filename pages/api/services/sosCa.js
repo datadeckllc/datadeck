@@ -24,7 +24,7 @@ const verifySosCaOutputXlsx = async (newCwd, inputPath, outputPath) => new Promi
         fileStream
     }
  */
-const callSosCa = async (inputFilePath) => {
+const callSosCa = async (inputFilePath, originalFilename) => {
     const ddpkgPath = path.resolve(process.cwd(), '..', process.env.services.sosCa.goPath);
     const newCwd = path.dirname(inputFilePath);
     const goArgumentInputFile = path.basename(inputFilePath);
@@ -32,7 +32,7 @@ const callSosCa = async (inputFilePath) => {
 
     console.log('Executing SOS CA', { 'newCwd': newCwd, 'cmd': cmd, 'inputFilePath': inputFilePath });
 
-    const soscaResult = await new Promise((resolve) => {
+    const sosCaProgResult = await new Promise((resolve) => {
         exec(cmd, { cwd: newCwd }, (err, stdout, stderr) => {
             if (err) {
                 console.error(`exec error: ${err}`);
@@ -50,10 +50,24 @@ const callSosCa = async (inputFilePath) => {
     });
 
     const outputPath = path.resolve(newCwd, process.env.services.sosCa.outputFileName);
+
+    const outputFileCreated = await verifySosCaOutputXlsx(newCwd, goArgumentInputFile, outputPath)
+    let status;
+    if (sosCaProgResult.err && outputFileCreated) {
+        status = 206;
+    }
+    else if (sosCaProgResult.err) {
+        status = 500;
+    }
+    else {
+        status = 200
+    }
     return {
-        ...soscaResult,
-        outputFileCreated: await verifySosCaOutputXlsx(newCwd, goArgumentInputFile, outputPath),
-        outputPath
+        ...sosCaProgResult,
+        outputFileCreated,
+        outputPath,
+        originalFilename,
+        status
     }
 };
 

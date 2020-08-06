@@ -2,20 +2,22 @@ import {sendJsonResponse} from "./lib";
 import fs from 'fs';
 import {serializeError} from 'serialize-error';
 
-const setContentDisposition = res => {
-    res.setHeader('Content-Disposition', `attachment; filename="${process.env.services.sosCa.outputFileName}"`);
+const setContentDisposition = (res, originalFilename) => {
+    const originalFilenameArr = originalFilename.split('.');
+    originalFilenameArr.pop();
+    const fileNameWithoutExtension = originalFilenameArr.join('.');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileNameWithoutExtension}---datadeck.xlsx"`);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 };
 
+
 export default async (req, res) => {
-    const sosCaResult = req.body.sosCaResult;
     console.log('Received request to get spreadsheet', req.body);
+    const sosCaResult = req.body;
 
     let alreadyResolved=false;
     return new Promise(resolve => {
         if (!sosCaResult.outputFileCreated) {
-            sosCaResult.filestream = fs.createReadStream(sosCaResult.outputPath);
-
             const wrappedErr = {
                 msg: 'No SOSCA Excel Output File Created by SOSCA Tool',
                 err: serializeError(sosCaResult.err)
@@ -29,6 +31,7 @@ export default async (req, res) => {
             return;
         }
 
+        sosCaResult.filestream = fs.createReadStream(sosCaResult.outputPath);
         sosCaResult.filestream.on('error', err => {
             const wrappedErr = {msg: 'Error reading sosCA Output File', err: serializeError(err)};
             console.error(wrappedErr);
@@ -39,12 +42,11 @@ export default async (req, res) => {
             }
         });
 
-        if (sosCaResult.err) {
-            console.log('Partial results detected');
-            res.status(206); // Let the pipe finish the partial results
-        }
+        sosCaResult.err = 'Some error occured'
 
-        setContentDisposition(res);
+        setContentDisposition(res, sosCaResult.originalFilename);
+
+        res.status(sosCaResult.status);
 
         sosCaResult.filestream.pipe(res)
             .on('error', err => {

@@ -9,13 +9,20 @@ The current functionality consists of:
 # Installation
 1. Create a <a href"https://github.com/">GitHub</a> account, if you dont have one already.
 1. Go to <a href="https://github.com/datadeckllc/datadeck">https://github.com/datadeckllc/datadeck</a>.
-1. For custom deployments of the software, click the "Code" button and copy the URL and clone the repository.
+1. Set up the `.env.local` file
+  1.  Copy the `sample.env` file to `.env.local` and customize as necessary
+1. Run `npm install`
 
-   For fast/easy deployment on <a href="https://vercel.com/">Vercel</a> (Makers of <a href="https://nextjs.org/">Next.js</a>, click on the "Fork" button. This creates a copy of the software under your GitHub account
-    1. Go to <a href="https://vercel.com/">https://vercel.com/</a>.
+# Running DataDeck - Development
+1.  Run `npm run dev`
+1.  Go to `http://localhost:3000` in the browser.  API requests are sent to `http://localhost:3000/api`
+
+# Running DataDeck - Production
+1.  Run `npm`
+1.  Run `npm run build`
+1.  Run `npm run start`
     
-    
-
-
-This is a starter template for [Learn Next.js](https://nextjs.org/learn).
+# Contributing
+*  The app is build with [Next.js](https://nextjs.org).
+*  Please open a PR for new features
 
