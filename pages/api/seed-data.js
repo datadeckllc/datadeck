@@ -57,6 +57,7 @@ export default async (req, res) => {
                     const sosCaResult = await callSosCa(files.file.path, originalFilename);
                     console.log('Finished Calling SOS CA.', sosCaResult);
 
+                    delete sosCaResult.stdout;
                     sendJsonResponse(req, res, 200, sosCaResult);
                     alreadyResolved=true;
                     resolve();}
