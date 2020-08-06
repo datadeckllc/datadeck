@@ -1,7 +1,7 @@
 import { Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import FileSaver from 'file-saver';
-import axios from '../lib/apiClient';
+import {axios } from '../lib/apiClient';
 import contentDisposition from 'content-disposition';
 import utilStyles from '../styles/utils.module.css'
 import {useState} from 'react';
@@ -36,7 +36,8 @@ export default () => {
                 setUploadMessage(UPLOAD_MESSAGE_PROCESSING);
             }
             if (status === 'done') {
-                const spreadsheetRes = await axios.post(`${process.env.apiClient.url}/get-spreadsheet`, info.file.response,{ responseType: 'arraybuffer', headers: { 'content-type': 'application/json' } } )
+                // TODO: It may be better to get the responseType as a stream so we don't load everything into memory.
+                const spreadsheetRes = await axios.post(`${process.env.apiClient.url}/get-spreadsheet`, info.file.response, { httpAgent, responseType: 'arraybuffer', headers: { 'content-type': 'application/json' } } )
                     .catch(err => {
                         const errMsg = `FAILURE: Processing of ${info.file.name} generated an error.  Error message: ${err.message}.`;
                         console.error(errMsg, err);

@@ -3,14 +3,30 @@ import {serializeError} from 'serialize-error';
 import formidable from 'formidable';
 import {v4 as uuidv4} from 'uuid';
 import {runMiddleware} from './middleware';
-import timeout from 'connect-timeout';
-import {sendJsonResponse} from "./lib";
-const { callSosCa } = require('./services/sosCa');
 
-const haltOnTimedout = (req, res, next) => {
-    if (!req.timedout) {
-        next();
-    }
+import {sendJsonResponse} from "./lib";
+import { callSosCa } from './services/sosCa';
+
+const setKeepAliveAndTimeouts = (req, res, next) => {
+    req.socket.setKeepAlive();
+
+    req.socket.on('timeout', () => {
+        console.log('Socket timed out');
+    });
+
+    req.socket.on( "error", err => {
+        console.log('Socket error', err);
+    } );
+
+    req.socket.on( "end", () => {
+        console.log('Socket end');
+    } );
+
+    req.setTimeout(process.env.api.timeout, () => {
+        console.log("Server timed out.  Milliseconds: ", process.env.api.timeout);
+    });
+
+    next();
 };
 
 // Disable the JSON body parser so we get a stream
@@ -25,9 +41,7 @@ const ensureDirExists = async targetDir => fs.promises.mkdir(targetDir, { recurs
 
 export default async (req, res) => {
     // Run the middleware: https://nextjs.org/docs/api-routes/api-middlewares
-    await runMiddleware(req, res, timeout(process.env.api.timeout))
-    // Add all other middleware here
-    await runMiddleware(req, res, haltOnTimedout);
+    await runMiddleware(req, res, setKeepAliveAndTimeouts);
 
     const uuid = uuidv4();
 

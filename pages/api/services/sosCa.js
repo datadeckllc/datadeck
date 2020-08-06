@@ -73,6 +73,6 @@ const callSosCa = async (inputFilePath, originalFilename) => {
     }
 };
 
-module.exports = {
+export {
     callSosCa,
 }
