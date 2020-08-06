@@ -7,6 +7,8 @@ The current functionality consists of:
 3) DataDeck matches the natural person records above with phone number and emails scraped from online people contact databases.
 
 # Installation
+1. Install Node.js.
+  1.  (Optional) Install through nvm, which lets you easily switch Node.js versions.  (https://github.com/nvm-sh/nvm)  Set up and use the LTS version
 1. Create a <a href"https://github.com/">GitHub</a> account, if you dont have one already.
 1. Create a directory to contain all of the DataDeck packages, e.g., `mkdir ~/datadeckllc`
 1. Run `cd ~/projects/datadeckllc`
