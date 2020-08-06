@@ -30,10 +30,10 @@ export default () => {
             const { status } = info.file;
             if (status !== 'uploading') {
                 console.log(info.file, info.fileList);
-                setUploadMessage(UPLOAD_MESSAGE_PROCESSING);
+                setUploadMessage(UPLOAD_MESSAGE_UPLOAD);
             }
             else {
-                setUploadMessage(UPLOAD_MESSAGE_UPLOAD);
+                setUploadMessage(UPLOAD_MESSAGE_PROCESSING);
             }
             if (status === 'done') {
                 const spreadsheetRes = await axios.post(`${process.env.apiClient.url}/get-spreadsheet`, info.file.response,{ responseType: 'arraybuffer', headers: { 'content-type': 'application/json' } } )
