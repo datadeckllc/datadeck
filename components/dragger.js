@@ -26,7 +26,7 @@ export default () => {
         showUploadList: false,
         action: `${process.env.apiClient.url}/seed-data`,
         onChange: async info => {
-            //console.log('Received upload response.  info', info);
+            console.log('Received upload response.  info', info);
             const { status } = info.file;
             if (status !== 'uploading') {
                 console.log(info.file, info.fileList);
