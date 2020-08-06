@@ -37,7 +37,7 @@ export default () => {
             }
             if (status === 'done') {
                 // TODO: It may be better to get the responseType as a stream so we don't load everything into memory.
-                const spreadsheetRes = await axios.post(`${process.env.apiClient.url}/get-spreadsheet`, info.file.response, { httpAgent, responseType: 'arraybuffer', headers: { 'content-type': 'application/json' } } )
+                const spreadsheetRes = await axios.post(`${process.env.apiClient.url}/get-spreadsheet`, info.file.response, { responseType: 'arraybuffer', headers: { 'content-type': 'application/json' } } )
                     .catch(err => {
                         const errMsg = `FAILURE: Processing of ${info.file.name} generated an error.  Error message: ${err.message}.`;
                         console.error(errMsg, err);

@@ -35,6 +35,8 @@ const callSosCa = async (inputFilePath, originalFilename) => {
     console.log('Executing SOS CA', { 'newCwd': newCwd, 'cmd': cmd, 'inputFilePath': inputFilePath });
 
     const sosCaProgResult = await new Promise((resolve) => {
+        // TODO: Get the stdout and stderr to be visible to the calling process immediately,
+        // TODO: so that you can see what's going on while tailing the logs
         exec(cmd, { cwd: newCwd, maxBuffer: 1024 * MAX_BUFFER }, (err, stdout, stderr) => {
             if (err) {
                 console.error(`exec error: ${err}`);
