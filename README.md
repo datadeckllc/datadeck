@@ -37,3 +37,4 @@ The current functionality consists of:
 *  The app is build with [Next.js](https://nextjs.org).
 *  Please open a PR for new features
 
+
