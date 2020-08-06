@@ -2,6 +2,8 @@ import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 
+const MAX_BUFFER = 50000;
+
 const verifySosCaOutputXlsx = async (newCwd, inputPath, outputPath) => new Promise(resolve => {
 
     console.log('Creating Readstream for output path', outputPath, 'inputPath', inputPath)
@@ -33,7 +35,7 @@ const callSosCa = async (inputFilePath, originalFilename) => {
     console.log('Executing SOS CA', { 'newCwd': newCwd, 'cmd': cmd, 'inputFilePath': inputFilePath });
 
     const sosCaProgResult = await new Promise((resolve) => {
-        exec(cmd, { cwd: newCwd }, (err, stdout, stderr) => {
+        exec(cmd, { cwd: newCwd, maxBuffer: 1024 * MAX_BUFFER }, (err, stdout, stderr) => {
             if (err) {
                 console.error(`exec error: ${err}`);
                 console.error(`Standard Out: ${stdout} Standard Err: ${stderr}`);

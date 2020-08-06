@@ -64,7 +64,7 @@ export default () => {
                 FileSaver.saveAs(blob, spreadsheetName);
 
             } else if (status === 'error') {
-                const details = info.file && info.file.response && info.file.response.msg;
+                const details = (info.file && info.file.response && info.file.response.msg) || (info.file && info.file.response);
                 const errMsg = `FAILED:${info.file.name} file upload failed. ${details ? details : ''}`;
                 console.error(errMsg);
                 message.error(errMsg, MESSAGE_FAILURE_DURATION);
